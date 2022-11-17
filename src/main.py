@@ -8,7 +8,7 @@ def decomposition(n):
     if n <= 0:
         return []
     else:
-        return [bool(n % 2)] + decomposition(n / 2)
+        return [bool(n % 2)] + decomposition(n // 2)
 
 """
     Renvoie soit la liste tronquée ne contenant que ses n premiers éléments, soit la liste complétée à droite
@@ -52,6 +52,7 @@ def test_table():
         assert [False, True, True, False, False, True, False, False] == table(38, 8)
     except AssertionError:
         print("Problème dans la fonction \"table\"")
+
 
 if __name__ == "__main__":
     test_decomposition()
