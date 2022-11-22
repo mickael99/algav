@@ -72,10 +72,10 @@ def test_constructor():
 
 def test_insertion():
     try:
-        t1 = DecisionTree("x1")
-        t1.insert_left("x2")
-        t1.insert_right("x3")
-        assert t1.__str__() == "(x1, (x2, None, None), (x3, None, None))"
+        t = DecisionTree("x1")
+        t.insert_left("x2")
+        t.insert_right("x3")
+        assert t.__str__() == "(x1, (x2, None, None), (x3, None, None))"
     except AssertionError:
         print("Problème au niveau des méthodes d'insertions")
 

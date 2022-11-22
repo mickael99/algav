@@ -4,14 +4,14 @@
     Renvoie une liste de bits représentant la décomposition en base 2 de l’entier x,
     telle que les bits de poids les plus faibles soient présentés en tête de liste
 """
-def decomposition(n):
-    if n <= 0:
+def decomposition(x):
+    if x <= 0:
         return []
     else:
-        return [bool(n % 2)] + decomposition(n // 2)
+        return [bool(x % 2)] + decomposition(x // 2)
 
 """
-    Renvoie soit la liste tronquée ne contenant que ses n premiers éléments, soit la liste complétée à droite
+    Renvoie soit la liste tronquée ne contenant que les n premiers éléments de l, soit la liste complétée à droite
     par des valeurs False, de taille n
 """
 def completion(l, n):
@@ -21,7 +21,7 @@ def completion(l, n):
         return l + ([False] * (n - len(l)))
 
 """
-    Déecompose x en base 2 et complète la liste obtenue afin qu’elle soit de taille n
+    Décompose x en base 2 et complète la liste obtenue afin qu’elle soit de taille n
 """
 def table(x, n):
     return completion(decomposition(x), n)
