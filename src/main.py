@@ -47,12 +47,28 @@ def build_tree(l):
     def rec_build_tree(l):
         log_binary = int(log2(len(l)))
         if len(l) == 2:
-            return DecisionTree("x" + str(log_binary), str(l[0]), str(l[1]))
+            return DecisionTree("x" + str(log_binary), DecisionTree(str(l[0])), DecisionTree(str(l[1])))
         slice_list = len(l) // 2
         return DecisionTree("x" + str(log_binary), rec_build_tree(l[:slice_list]), rec_build_tree(l[slice_list:]))
     while is_power_of_2(len(l)) == False:
         l += [False]
     return rec_build_tree(l)
+
+"""
+    Associe un mot Luka à chaque noeud de l'arbre de décision non compréssé
+"""
+def luka(t):
+    if t == None:
+        return
+    if t.left != None:
+        luka(t.left)
+    if t.right != None:
+        luka(t.right)
+    if t.label != "False" and t.label != "True":
+        t.luka_v = t.label + "(" + t.left.luka_v + ")" + "(" + t.right.luka_v + ")"
+    else:
+        t.luka_v = t.label
+    return t
 
 """
 
@@ -92,15 +108,20 @@ def test_power_of_2():
     except AssertionError:
         print("Problème dans la fonction puissance de 2")
 
+
 def test_build_tree():
     try:
-        assert build_tree(table(38, 8)).__str__() == "(x3, (x2, (x1, False, True), (x1, True, False)), (x2, (x1, False, True), (x1, False, False)))"
+        assert build_tree(table(38, 8)).__str__() == "(x3, (x2, (x1, (False, None, None), (True, None, None)), (x1, (True, None, None), (False, None, None))), (x2, (x1, (False, None, None), (True, None, None)), (x1, (False, None, None), (False, None, None))))"
     except AssertionError:
         print("Problème dans la fonction qui construit un arbre de décision non compréssé à partir d'une liste")
 
-#en developpement
-def luka(t):
-    return "(" + t.label + luka(t.left) + luka(t.right) + ")"
+def test_luka():
+    try:
+        t = luka(build_tree(table(38, 8)))
+        assert t.luka_v == "x3(x2(x1(False)(True))(x1(True)(False)))(x2(x1(False)(True))(x1(False)(False)))"
+    except:
+        print("Problème dans la fonction qui construit un mot Luka")
+
 
 if __name__ == "__main__":
     test_decomposition()
@@ -108,3 +129,4 @@ if __name__ == "__main__":
     test_table()
     test_power_of_2()
     test_build_tree()
+    test_luka()

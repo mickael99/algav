@@ -33,6 +33,7 @@ class DecisionTree:
         self.label = label
         self.left = left
         self.right = right
+        self.luka_v = ""
 
     """
         Insère un nouveau noeud qui sera le fils gauche de l'arbre
