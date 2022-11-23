@@ -30,6 +30,31 @@ def table(x, n):
     return completion(decomposition(x), n)
 
 """
+    Renvoie vrai si x est une puissance de 2, faux sinon
+"""
+def is_power_of_2(x):
+    if x == 1:
+        return True
+    if x < 1:
+        return False
+    return is_power_of_2(x / 2)
+
+"""
+    Construit un arbre de décision à partir d'une liste (on suppose que cette liste n'a pas forcément une taille 
+    qui est une puissance de 2, de ce fait, on corrige cette potentielle erreur
+"""
+def build_tree(l):
+    def rec_build_tree(l):
+        log_binary = int(log2(len(l)))
+        if len(l) == 2:
+            return DecisionTree("x" + str(log_binary), str(l[0]), str(l[1]))
+        slice_list = len(l) // 2
+        return DecisionTree("x" + str(log_binary), rec_build_tree(l[:slice_list]), rec_build_tree(l[slice_list:]))
+    while is_power_of_2(len(l)) == False:
+        l += [False]
+    return rec_build_tree(l)
+
+"""
 
     FONCTIONS DE TEST
     
@@ -67,35 +92,11 @@ def test_power_of_2():
     except AssertionError:
         print("Problème dans la fonction puissance de 2")
 
-def is_power_of_2(x):
-    if x == 1:
-        return True
-    if x < 1:
-        return False
-    return is_power_of_2(x / 2)
-
-index_build_tree = 0
-
-def rec_build_tree(l, t, level_max, current_level):
-    global index_build_tree
-    if current_level < level_max - 1:
-        t.insert_left("x" + str(level_max - current_level - 1))
-        t.insert_right("x" + str(level_max - current_level - 1))
-        rec_build_tree(l, t.left, level_max, current_level + 1)
-        rec_build_tree(l, t.right, level_max, current_level + 1)
-    else:
-        t.insert_left(str(l[index_build_tree]))
-        t.insert_right(str(l[index_build_tree + 1]))
-        index_build_tree += 2
-
-def build_tree(l):
-    while is_power_of_2(len(l)) == False:
-        l += [False]
-    logarithm_binary = int(log2(len(l)))
-    t = DecisionTree("x" + str(logarithm_binary))
-    index_build_tree = 0
-    rec_build_tree(l, t, logarithm_binary, 0)
-    return t
+def test_build_tree():
+    try:
+        assert build_tree(table(38, 8)).__str__() == "(x3, (x2, (x1, False, True), (x1, True, False)), (x2, (x1, False, True), (x1, False, False)))"
+    except AssertionError:
+        print("Problème dans la fonction qui construit un arbre de décision non compréssé à partir d'une liste")
 
 #en developpement
 def luka(t):
@@ -106,5 +107,4 @@ if __name__ == "__main__":
     test_completion()
     test_table()
     test_power_of_2()
-
-print(build_tree(table(38, 8)))
+    test_build_tree()
