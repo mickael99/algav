@@ -106,19 +106,24 @@ def luka(t):
     
     return(DecisionTree) -> l'arbre compréssé
 """
-
-def compression(t, d):
-    res_t = d.get(t.luka_v)
-    #si le noeud n'est pas dans le dictionnaire, alors on l'ajoute
-    if res_t == None:
-        d[t.luka_v] = t
-        #si c'est une feuille alors on renvoie cette dernière, sinon on continue à parcourir l'arbre
-        if t.label != "False" and t.label != "True":
-            t.left = compression(t.left, d)
-            t.right = compression(t.right, d)
-        return t
-    else:
-        return res_t
+def compression(t):
+    def rec_compression(t, d):
+        res_t = d.get(t.luka_v)
+        #si le noeud n'est pas dans le dictionnaire, alors on l'ajoute
+        if res_t == None:
+            d[t.luka_v] = t
+            #si c'est une feuille alors on renvoie cette dernière, sinon on continue à parcourir l'arbre
+            if t.label != "False" and t.label != "True":
+                t.left = rec_compression(t.left, d)
+                t.right = rec_compression(t.right, d)
+            return t
+        else:
+            return res_t
+    if t.luka_v == "":
+        luka(t)
+    t = rec_compression(t, {})
+    associate_id(t)
+    return t
 
 """
     Associe un identifiant unique à chaque noeud de l'arbre
@@ -165,10 +170,11 @@ def create_list_from_decision_tree(t):
     Créé un fichier dot et un fichier png à partir d'un arbre 
     
     t(Decisiontree) -> l'arbre de décision
+    file_name(string) -> le nom du fichier
 """
-def create_dot(t):
+def create_dot(t, file_name):
     if t.id == -1:
-        raise DecisionTreeError(t, "impossible de créer un fichier dot sans que les noeuds n'aient d'identifiant")
+        associate_id(t)
 
     #création du dossier dot où sera stocké le fichier de sortie
     if not os.path.exists("../dot"):
@@ -178,14 +184,14 @@ def create_dot(t):
     l = create_list_from_decision_tree(t)
 
     #écriture dans le fichier
-    f = open("../dot/tree.dot","w")
+    f = open("../dot/" + file_name + ".dot","w")
     f.write("graph {\n")
 
     for node in l:
         if node[0].label != "False" and node[0].label != "True":
-            f.write("\t" + str(node[0].id) + "[label = \"" + str(node[0].luka_v) + "\"];\n")
-            f.write("\t" + str(node[1].id) + "[label = \"" + str(node[1].luka_v) + "\";]\n")
-            f.write("\t" + str(node[2].id) + "[label = \"" + str(node[2].luka_v) + "\";]\n")
+            f.write("\t" + str(node[0].id) + "[label = \"" + str(node[0].label) + "\"];\n")
+            f.write("\t" + str(node[1].id) + "[label = \"" + str(node[1].label) + "\";]\n")
+            f.write("\t" + str(node[2].id) + "[label = \"" + str(node[2].label) + "\";]\n")
             f.write("\t" + str(node[0].id) + " -- " + str(node[1].id) + "[ style=dashed  ];\n")
             f.write("\t" + str(node[0].id) + " -- " + str(node[2].id) + "[ style=solid  ];\n")
     f.write("}")
@@ -193,7 +199,27 @@ def create_dot(t):
     f.close()
 
     #créer le fichier "tree.png" qui affiche l'arbre
-    subprocess.run("dot -Tpng ../dot/tree.dot -o ../dot/tree.png")
+    subprocess.run("dot -Tpng ../dot/" + file_name + ".dot" + " -o ../dot/" + file_name + ".png")
+
+"""
+    Compresse
+"""
+def compress_bdd(t):
+    def rec_compress_bdd(t):
+        #si t est une feuille
+        if t.label == "True" or t.label == "False":
+            return t
+        #si t n'est pas une feuille
+        t.left = rec_compress_bdd(t.left)
+        t.right = rec_compress_bdd(t.right)
+        if t.left.id == t.right.id:
+            return t.right
+        return t
+    if t.luka_v == "":
+        luka(t)
+    t = compression(t)
+    return rec_compress_bdd(t)
+
 
 
 """
@@ -248,6 +274,27 @@ def test_luka():
     except:
         print("Problème dans la fonction qui construit un mot Luka")
 
+"""
+    FONCTIONS DE DESSINS DE GRAPHES
+"""
+
+def create_classic_tree_png():
+    t = build_tree(table(38, 8))
+    create_dot(t, "classic_tree")
+    print("le fichier dot/classic_tree.png a bien ete cree, vous pouvez des a present l'ouvir")
+
+def create_compress_tree_png():
+    t = build_tree(table(38, 8))
+    t = compression(t)
+    create_dot(t, "compress_tree")
+    print("le fichier dot/compress_tree.png a bien ete cree, vous pouvez des a present l'ouvir")
+
+def create_compress_bdd_tree_png():
+    t = build_tree(table(38, 8))
+    t = compress_bdd(t)
+    create_dot(t, "compress_bdd_tree")
+    print("le fichier dot/compress_bdd_tree.png a bien ete cree, vous pouvez des a présent l'ouvir")
+
 if __name__ == "__main__":
     test_decomposition()
     test_completion()
@@ -256,8 +303,5 @@ if __name__ == "__main__":
     test_build_tree()
     test_luka()
 
-    t = build_tree(table(38, 8))
-    luka(t)
-    associate_id(t)
-    create_dot(t)
+    create_compress_bdd_tree_png()
 
