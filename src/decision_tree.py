@@ -4,8 +4,8 @@
 class InsertionDecisionTreeError(Exception):
     """
         Constructeur:
-            s -> l'argument passé en paramètre de la fonction
-            f -> la fonction dans laquelle l'exception a été levée
+            s(string) -> l'argument passé en paramètre de la fonction
+            f(string) -> la fonction dans laquelle l'exception a été levée
     """
     def __init__(self, s, f = ""):
         Exception.__init__(self, s)
@@ -25,19 +25,21 @@ class InsertionDecisionTreeError(Exception):
 class DecisionTree:
     """
         Constructeur:
-            label -> l'étiquette du noeud
-            left -> fils gauche du noeud
-            right -> fils droit du noeud
+            label(string) -> l'étiquette du noeud
+            left(DecisionTree) -> fils gauche du noeud
+            right(DecisionTree) -> fils droit du noeud
     """
     def __init__(self, label, left = None, right = None):
         self.label = label
         self.left = left
         self.right = right
         self.luka_v = ""
+        self.id = -1
 
     """
         Insère un nouveau noeud qui sera le fils gauche de l'arbre
-            value -> étiquette du fils gauche
+        
+        value(string) -> étiquette du fils gauche
     """
     def insert_left(self, value):
         if self.left == None:
@@ -47,7 +49,8 @@ class DecisionTree:
 
     """
         Insère un nouveau noeud qui sera le fils droit de l'arbre
-            value -> étiquette du fils droit
+        
+        value(string) -> étiquette du fils droit
     """
     def insert_right(self, value):
         if self.right == None:
