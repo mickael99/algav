@@ -3,6 +3,8 @@
 from decision_tree import *
 from math import log2
 import graphviz
+import os
+import subprocess
 
 """
     Renvoie une liste de bits représentant la décomposition en base 2 de l’entier x,
@@ -104,25 +106,19 @@ def luka(t):
     
     return(DecisionTree) -> l'arbre compréssé
 """
-def compression(t):
-    """
-        On utilise un dictionnaire pour pouvoir stocker les noeuds dans ce dernier et ainsi fusionner les noeuds
-        avec un mot Luka similaire
-    """
-    def rec_compression(t, d):
-        res_t = d.get(t.luka_v)
-        #si le noeud n'est pas dans le dictionnaire, alors on l'ajoute
-        if res_t == None:
-            d[t.luka_v] = t
-            #si c'est une feuille alors on renvoie cette dernière, sinon on continue à parcourir l'arbre
-            if t.label != "False" and t.label != "True":
-                t.left = rec_compression(t.left, d)
-                t.right = rec_compression(t.right, d)
-            return t
-        else:
-            return res_t
 
-    return rec_compression(t, {})
+def compression(t, d):
+    res_t = d.get(t.luka_v)
+    #si le noeud n'est pas dans le dictionnaire, alors on l'ajoute
+    if res_t == None:
+        d[t.luka_v] = t
+        #si c'est une feuille alors on renvoie cette dernière, sinon on continue à parcourir l'arbre
+        if t.label != "False" and t.label != "True":
+            t.left = compression(t.left, d)
+            t.right = compression(t.right, d)
+        return t
+    else:
+        return res_t
 
 """
     Associe un identifiant unique à chaque noeud de l'arbre
@@ -147,11 +143,58 @@ def associate_id(t):
     rec_associate_id(t, 0, [])
 
 """
-    Créé un fichier dot à partir d'un arbre
+    Créé une liste contenant toutes les adresses des noeuds d'un arbre de décision
+    
+    t(DecisionTree) -> arbre de décision 
+    
+    return(liste liste) -> la listes contenant les noeuds
+"""
+def create_list_from_decision_tree(t):
+    def rec_create_list_from_decision_tree(t, l):
+        if t == None:
+            return None
+        if [t, t.left, t.right] not in l:
+            l.append([t, t.left, t.right])
+        rec_create_list_from_decision_tree(t.left, l)
+        rec_create_list_from_decision_tree(t.right, l)
+    l = []
+    rec_create_list_from_decision_tree(t, l)
+    return l
+
+"""
+    Créé un fichier dot et un fichier png à partir d'un arbre 
     
     t(Decisiontree) -> l'arbre de décision
 """
-#def create_dot(t):
+def create_dot(t):
+    if t.id == -1:
+        raise DecisionTreeError(t, "impossible de créer un fichier dot sans que les noeuds n'aient d'identifiant")
+
+    #création du dossier dot où sera stocké le fichier de sortie
+    if not os.path.exists("../dot"):
+        os.mkdir("../dot")
+
+    #récupération de la liste des noeuds de l'arbre
+    l = create_list_from_decision_tree(t)
+
+    #écriture dans le fichier
+    f = open("../dot/tree.dot","w")
+    f.write("graph {\n")
+
+    for node in l:
+        if node[0].label != "False" and node[0].label != "True":
+            f.write("\t" + str(node[0].id) + "[label = \"" + str(node[0].luka_v) + "\"];\n")
+            f.write("\t" + str(node[1].id) + "[label = \"" + str(node[1].luka_v) + "\";]\n")
+            f.write("\t" + str(node[2].id) + "[label = \"" + str(node[2].luka_v) + "\";]\n")
+            f.write("\t" + str(node[0].id) + " -- " + str(node[1].id) + "[ style=dashed  ];\n")
+            f.write("\t" + str(node[0].id) + " -- " + str(node[2].id) + "[ style=solid  ];\n")
+    f.write("}")
+
+    f.close()
+
+    #créer le fichier "tree.png" qui affiche l'arbre
+    subprocess.run("dot -Tpng ../dot/tree.dot -o ../dot/tree.png")
+
 
 """
 
@@ -212,4 +255,9 @@ if __name__ == "__main__":
     test_power_of_2()
     test_build_tree()
     test_luka()
+
+    t = build_tree(table(38, 8))
+    luka(t)
+    associate_id(t)
+    create_dot(t)
 

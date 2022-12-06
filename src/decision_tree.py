@@ -1,7 +1,7 @@
 """
-    Exception qui se lance lorsqu'il est impossible d'insérer un noeud dans un arbre de décision
+    Exception qui se lance lorsqu'il est impossible d'insérer un noeud dans un arbre de décision ou autre problèmes
 """
-class InsertionDecisionTreeError(Exception):
+class DecisionTreeError(Exception):
     """
         Constructeur:
             s(string) -> l'argument passé en paramètre de la fonction
@@ -16,7 +16,7 @@ class InsertionDecisionTreeError(Exception):
         Fonction d'affichage
     """
     def __str__(self):
-        return "exception \"InsertionDecisionTreeError\" lancée depuis la fonction \" " + self.f + \
+        return "exception \"DecisionTreeError\" lancée depuis la fonction \" " + self.f + \
                 "\" avec le paramètre " + self.s
 
 """
@@ -45,7 +45,7 @@ class DecisionTree:
         if self.left == None:
             self.left = DecisionTree(value)
         else:
-            raise InsertionDecisionTreeError(value, "insert_left")
+            raise DecisionTreeError(value, "insert_left")
 
     """
         Insère un nouveau noeud qui sera le fils droit de l'arbre
@@ -56,7 +56,7 @@ class DecisionTree:
         if self.right == None:
             self.right = DecisionTree(value)
         else:
-            raise InsertionDecisionTreeError(value, "insert_right")
+            raise DecisionTreeError(value, "insert_right")
 
     """
         Fonction d'affichage
