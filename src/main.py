@@ -1,10 +1,16 @@
 #coding:utf-8
 
 from decision_tree import *
+from experimentation import *
+from copy import deepcopy
 from math import log2
-import graphviz
 import os
+import sys
 import subprocess
+import time
+from random import randint
+
+sys.setrecursionlimit(10**6)
 
 """
     Renvoie une liste de bits représentant la décomposition en base 2 de l’entier x,
@@ -202,7 +208,11 @@ def create_dot(t, file_name):
     subprocess.run("dot -Tpng ../dot/" + file_name + ".dot" + " -o ../dot/" + file_name + ".png")
 
 """
-    Compresse
+    Compresse un arbre en robdd unique 
+    
+    t(DecisionTree) -> l'arbre à comprésser
+    
+    return(DecisionTree) -> l'arbre Robdd résultant
 """
 def compress_bdd(t):
     def rec_compress_bdd(t):
@@ -274,8 +284,17 @@ def test_luka():
     except:
         print("Problème dans la fonction qui construit un mot Luka")
 
+def test_size():
+    try:
+        t = build_tree(table(38, 8))
+        t2 = compress_bdd(deepcopy(t))
+        assert t.size() == 15
+        assert t2.size() == 7
+    except:
+        print("Problème dans la fonction size")
+
 """
-    FONCTIONS DE DESSINS DE GRAPHES
+    FONCTIONS DE DESSINS D'ARBRE
 """
 
 def create_classic_tree_png():
@@ -295,13 +314,225 @@ def create_compress_bdd_tree_png():
     create_dot(t, "compress_bdd_tree")
     print("le fichier dot/compress_bdd_tree.png a bien ete cree, vous pouvez des a présent l'ouvir")
 
+"""
+
+    FONCTION DE DESSINS DES GRAPHIQUES
+
+"""
+
+"""
+    Trie un dictionnaire en fonction de la valeur des clés 
+    
+    d(dict) -> le dictionnaire à trier
+    
+    return(dict) -> le dictionnaire trié
+"""
+def sorted_dic(d):
+    keys = list(d.keys())
+    keys = sorted(keys)
+    sorted_d = {}
+
+    for key in keys:
+        sorted_d[key] = d[key]
+
+    return sorted_d
+
+"""
+     Créer un dictionnaire qui contient (point abscice: point ordonné)
+     
+     n(int) -> nombre de variables
+     
+     return(int, int) -> (valeurs de l'axe des absices, valeurs de l'axe des ordonnés)
+"""
+def create_graphic_point(n):
+    #Création de tous les arbre possibles pour 1 seul variable -> x1
+    #le nombre de noeud dans un arbre compréssé BDD vaut le nombre de fonction booléennes possibles
+    trees = []
+    graphic_point = {}
+    n = pow(2, n)
+    nb_possibility = pow(2, n)
+
+    if n >= pow(2, 5):
+        for i in range(pow(2, 16)):
+            rand_number = randint(0, nb_possibility)
+            trees.append(build_tree(table(rand_number, n)))
+            trees[i] = compress_bdd(trees[i])
+            size_tree = trees[i].size()
+            if size_tree in graphic_point:
+                graphic_point[size_tree] += 1
+            else:
+                graphic_point[size_tree] = 1
+        graphic_point = sorted_dic(graphic_point)
+    else:
+        for i in range(0, nb_possibility):
+            trees.append(build_tree(table(i, n)))
+            trees[i] = compress_bdd(trees[i])
+            size_tree = trees[i].size()
+            if size_tree in graphic_point:
+                graphic_point[size_tree] += 1
+            else:
+                graphic_point[size_tree] = 1
+        graphic_point = sorted_dic(graphic_point)
+
+    print(graphic_point)
+    return graphic_point.keys(), graphic_point.values()
+
+"""
+   Créer un graphique pour 1 variable
+"""
+def create_graphic_for_1_var():
+    keys, values = create_graphic_point(1)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 1 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 4, 0, 4])
+    plt.show()
+
+"""
+   Créer un graphique pour 2 variable
+"""
+def create_graphic_for_2_var():
+    keys, values = create_graphic_point(2)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 2 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 6, 0, 9])
+    plt.show()
+
+"""
+   Créer un graphique pour 3 variable
+"""
+def create_graphic_for_3_var():
+    keys, values = create_graphic_point(3)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 3 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 8, 0, 100])
+    plt.show()
+
+"""
+   Créer un graphique pour 4 variable
+"""
+def create_graphic_for_4_var():
+    keys, values = create_graphic_point(4)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 4 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 13, -500, 2.5 * pow(10, 4)])
+    plt.show()
+
+"""
+   Créer un graphique pour 5 variable
+"""
+def create_graphic_for_5_var():
+    keys, values = create_graphic_point(5)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 5 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 25, -500, 20000])
+    plt.show()
+
+
+"""
+   Créer un graphique pour 6 variable
+"""
+def create_graphic_for_6_var():
+    keys, values = create_graphic_point(6)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 6 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([15, 35, -500, 20000])
+    plt.show()
+
+"""
+   Créer un graphique pour 7 variable
+"""
+def create_graphic_for_7_var():
+    keys, values = create_graphic_point(7)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 7 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 50, -500, 20000])
+    plt.show()
+
+"""
+   Créer un graphique pour 8 variable
+"""
+def create_graphic_for_8_var():
+    keys, values = create_graphic_point(8)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 8 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 90, -500, 20000])
+    plt.show()
+
+"""
+   Créer un graphique pour 9 variable
+"""
+def create_graphic_for_9_var():
+    keys, values = create_graphic_point(9)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 9 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 150, -500, 20000])
+    plt.show()
+
+"""
+   Créer un graphique pour 10 variable
+"""
+def create_graphic_for_10_var():
+    keys, values = create_graphic_point(10)
+
+    plt.plot(list(keys), list(values), "b-o")
+    plt.xlabel("ROBDD node count for 10 variable")
+    plt.ylabel("Number of Boolean functions")
+    plt.grid()
+    plt.axis([0, 300, -500, 20000])
+    plt.show()
+
 if __name__ == "__main__":
+    begin = time.process_time()
     test_decomposition()
     test_completion()
     test_table()
     test_power_of_2()
     test_build_tree()
     test_luka()
+    test_size()
 
-    create_compress_bdd_tree_png()
+    #create_graphic_for_1_var()
+    #create_graphic_for_2_var()
+    #create_graphic_for_3_var()
+    #create_graphic_for_4_var()
+    #create_graphic_for_5_var()
+    #create_graphic_for_6_var()
+    #create_graphic_for_7_var()
+    #create_graphic_for_8_var()
+    #create_graphic_for_9_var()
+    #create_graphic_for_10_var()
+    end = time.process_time()
+    complete_time = end - begin
+    if complete_time < 60:
+        print("temps d'execution -> " + str(complete_time) + " seconde(s)")
+    else:
+        print("temps d'execution -> " + str(int(complete_time // 60)) + " minute(s) et " + str(int(complete_time % 60)) + " seconde(s)")
+
 

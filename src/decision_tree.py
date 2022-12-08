@@ -1,3 +1,7 @@
+from main import *
+from copy import deepcopy
+from experimentation import *
+
 """
     Exception qui se lance lorsqu'il est impossible d'insérer un noeud dans un arbre de décision ou autre problèmes
 """
@@ -59,6 +63,23 @@ class DecisionTree:
             raise DecisionTreeError(value, "insert_right")
 
     """
+        Compte le nombre de noeud différent dans l'arbre
+        
+        return(int) -> nombre de noeud différent
+    """
+    def size(self):
+        def rec_size(t, l):
+            if t == None:
+                return 0
+            if t.id not in l:
+                l += [t.id]
+                return 1 + rec_size(t.left, l) + rec_size(t.right, l)
+            return rec_size(t.left, l) + rec_size(t.right, l)
+        if self.id == -1:
+            associate_id(self)
+        return rec_size(self, [])
+
+    """
         Fonction d'affichage
     """
     def __str__(self):
@@ -86,6 +107,3 @@ def test_insertion():
 if __name__ == "__main__":
     test_constructor()
     test_insertion()
-
-
-
