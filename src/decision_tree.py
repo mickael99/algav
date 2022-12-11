@@ -1,6 +1,5 @@
 from main import *
 from copy import deepcopy
-from experimentation import *
 
 """
     Exception qui se lance lorsqu'il est impossible d'insérer un noeud dans un arbre de décision ou autre problèmes

@@ -1,7 +1,7 @@
 #coding:utf-8
 
+from matplotlib import pyplot as plt
 from decision_tree import *
-from experimentation import *
 from copy import deepcopy
 from math import log2
 import os
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     test_luka()
     test_size()
 
-    #create_graphic_for_1_var()
+    create_graphic_for_1_var()
     #create_graphic_for_2_var()
     #create_graphic_for_3_var()
     #create_graphic_for_4_var()
